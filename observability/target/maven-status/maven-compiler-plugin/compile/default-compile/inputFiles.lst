@@ -1,0 +1,4 @@
+/Users/jycamier/workspace/rexel/poc-spring-boot-observability/observability/src/main/java/com/example/observability/BaggageServerSpanTagger.java
+/Users/jycamier/workspace/rexel/poc-spring-boot-observability/observability/src/main/java/com/example/observability/ObservabilityAutoConfiguration.java
+/Users/jycamier/workspace/rexel/poc-spring-boot-observability/observability/src/main/java/com/example/observability/ServerErrorRecorder.java
+/Users/jycamier/workspace/rexel/poc-spring-boot-observability/observability/src/main/java/com/example/observability/UnhandledExceptionResolver.java

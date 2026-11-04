@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ms-cart
+  config:
+    import: classpath:observability.yml, classpath:security.yml
+  http:
+    serviceclient:
+      ms-user:
+        base-url: http://ms-user:8080
+        connect-timeout: 500ms
+        read-timeout: 500ms
+      ms-catalog:
+        base-url: http://ms-catalog:8080
+        connect-timeout: 500ms
+        read-timeout: 1s

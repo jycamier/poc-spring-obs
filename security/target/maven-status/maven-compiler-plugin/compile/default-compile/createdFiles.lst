@@ -1,0 +1,2 @@
+com/example/security/JwtSecurityAutoConfiguration.class
+com/example/security/CustomerContextFilter.class

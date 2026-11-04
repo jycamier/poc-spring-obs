@@ -1,0 +1,59 @@
+# Images are built by Jib beforehand:  ./mvnw package jib:dockerBuild
+x-microservice: &microservice
+  pull_policy: never
+  depends_on: [otel-collector]
+
+services:
+  ms-cart:
+    <<: *microservice
+    image: poc/ms-cart
+    ports: ["8080:8080"]
+    depends_on: [otel-collector, ms-catalog, ms-user]
+
+  ms-catalog:
+    <<: *microservice
+    image: poc/ms-catalog
+
+  ms-user:
+    <<: *microservice
+    image: poc/ms-user
+
+  # Receives traces and logs over OTLP, sends traces to Jaeger and logs to Loki
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    depends_on: [jaeger, loki]
+
+  jaeger:
+    # 2.21+ drops the legacy /api/services HTTP API that Grafana's Jaeger datasource still calls
+    image: jaegertracing/jaeger:2.20.0
+    ports: ["16686:16686"]
+
+  loki:
+    image: grafana/loki:3.7.8
+
+  # Where logs and traces meet: Loki line -> Jaeger trace, Jaeger span -> Loki lines
+  grafana:
+    image: grafana/grafana:13.2.3
+    ports: ["3000:3000"]
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/customer-journey.json
+    volumes:
+      - ./grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - ./grafana/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on: [jaeger, loki]
+
+  # Navigation scenarios: docker compose run --rm k6
+  k6:
+    image: grafana/k6:2.3.0
+    profiles: [load]
+    command: ["run", "/scripts/navigation.js"]
+    volumes:
+      - ./k6:/scripts:ro
+    depends_on: [ms-cart]

@@ -1,0 +1,10 @@
+com/example/cart/CatalogClient.class
+com/example/cart/UserClient$Customer.class
+com/example/cart/CartWebConfiguration.class
+com/example/cart/CartController$CartView.class
+com/example/cart/DownstreamErrorHandler.class
+com/example/cart/CartController.class
+com/example/cart/CatalogClient$Product.class
+com/example/cart/CartContextInterceptor.class
+com/example/cart/UserClient.class
+com/example/cart/CartApplication.class

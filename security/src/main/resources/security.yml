@@ -1,0 +1,10 @@
+# Shared by every service through `spring.config.import: classpath:security.yml`
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # In real life: issuer-uri of the IdP (Auth0...). Here a local key, tokens come from jwt/mint.sh
+          public-key-location: classpath:jwt/poc-public.pem
+          # Authentication.getName() returns this claim
+          principal-claim-name: customer_id

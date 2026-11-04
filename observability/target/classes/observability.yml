@@ -1,0 +1,32 @@
+# Shared by every service through `spring.config.import: classpath:observability.yml`
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    baggage:
+      # propagated to downstream services (W3C `baggage` header)
+      remote-fields: customer.id, cart.id
+      # copied into the MDC, hence into every log line
+      correlation:
+        fields: customer.id, cart.id
+      # copied as attributes on every span
+      tag-fields: customer.id, cart.id
+  opentelemetry:
+    resource-attributes:
+      deployment.environment.name: poc
+    tracing:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/traces
+    logging:
+      export:
+        otlp:
+          endpoint: http://otel-collector:4318/v1/logs
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
+logging:
+  pattern:
+    correlation: "[%X{traceId:-},%X{spanId:-}] [customer=%X{customer.id:-} cart=%X{cart.id:-}] "

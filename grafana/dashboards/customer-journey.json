@@ -1,0 +1,136 @@
+{
+  "uid": "customer-journey",
+  "title": "Parcours client",
+  "tags": [
+    "poc"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "",
+  "schemaVersion": 41,
+  "templating": {
+    "list": [
+      {
+        "name": "customer",
+        "label": "customer_id",
+        "type": "textbox",
+        "query": "C-1001",
+        "current": {
+          "text": "C-1001",
+          "value": "C-1001"
+        }
+      },
+      {
+        "name": "cart",
+        "label": "cart_id",
+        "type": "textbox",
+        "query": ".*",
+        "current": {
+          "text": ".*",
+          "value": ".*"
+        },
+        "description": "Regex, .* pour tous les paniers"
+      },
+      {
+        "name": "service",
+        "label": "Service",
+        "type": "custom",
+        "query": "ms-cart,ms-catalog,ms-user",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Traces du client (cliquer sur l'ID pour ouvrir la trace)",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 7
+      },
+      "datasource": {
+        "type": "jaeger",
+        "uid": "jaeger"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "jaeger",
+            "uid": "jaeger"
+          },
+          "queryType": "search",
+          "service": "ms-cart",
+          "tags": "customer.id=$customer",
+          "limit": 50
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "µs"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "Logs du client, tous services",
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 24,
+        "h": 18
+      },
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{service_name=~\"$service\"} | customer_id=\"$customer\" | cart_id=~\"$cart\" | line_format `{{ printf \"%-10s\" .service_name }} {{ printf \"%-5s\" (.detected_level | upper) }} {{ __line__ }}`",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Ascending",
+        "dedupStrategy": "none",
+        "prettifyLogMessage": false
+      }
+    }
+  ]
+}

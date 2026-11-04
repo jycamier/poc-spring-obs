@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: ms-user
+  config:
+    import: classpath:observability.yml, classpath:security.yml
